@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; }
+  html, body { background: transparent; overflow: hidden; }
+  canvas { display: block; }
+  #debug { position: fixed; top: 4px; left: 4px; color: #ff0; font: 12px monospace; z-index: 999; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="debug">waiting...</div>
+<canvas id="c"></canvas>
+<script>
+// --- config ---
+const WS_URL = "ws://localhost:16900";
+const PRESET_URL = "arrows-zxc.json";
+const SPRITE_URL = "qwerty-pixel-with-keypad.png";
+const PRESSED_OFFSET = 47; // blue keys are 47px below gray keys in the sprite sheet
+const SCALE = 2;           // render size multiplier
+
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+
+let keys = [];           // preset elements
+let sprite = null;       // loaded image
+let pressed = {};        // code -> true
+let ready = false;
+
+// --- init ---
+async function init() {
+  const [presetResp, img] = await Promise.all([
+    fetch(PRESET_URL).then(r => r.json()),
+    new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.src = SPRITE_URL;
+    })
+  ]);
+
+  keys = presetResp.elements;
+  sprite = img;
+
+  // auto-size canvas to however big the preset is
+  let maxX = 0, maxY = 0;
+  for (const k of keys) {
+    maxX = Math.max(maxX, k.pos[0] + k.mapping[2]);
+    maxY = Math.max(maxY, k.pos[1] + k.mapping[3]);
+  }
+  canvas.width = maxX * SCALE;
+  canvas.height = maxY * SCALE;
+  ctx.imageSmoothingEnabled = false;
+
+  ready = true;
+  draw();
+}
+
+function draw() {
+  if (!ready) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (const k of keys) {
+    const isPressed = pressed[k.code] === true;
+    const [sx, sy, sw, sh] = k.mapping;
+    const dy = isPressed ? PRESSED_OFFSET : 0;
+    const [dx, dw, dh] = [k.pos[0], k.mapping[2], k.mapping[3]];
+
+    ctx.drawImage(
+      sprite,
+      sx, sy + dy, sw, sh,       // source: gray or blue key from sprite sheet
+      dx * SCALE, k.pos[1] * SCALE, dw * SCALE, sh * SCALE  // dest: canvas position
+    );
+  }
+
+  requestAnimationFrame(draw);
+}
+
+// --- websocket ---
+function connect() {
+  const ws = new WebSocket(WS_URL);
+  ws.onopen = () => { document.getElementById("debug").textContent = "connected"; console.log("connected to bridge"); };
+  ws.onclose = () => {
+    document.getElementById("debug").textContent = "disconnected";
+    console.log("disconnected, reconnecting in 2s...");
+    setTimeout(connect, 2000);
+  };
+  ws.onmessage = (e) => {
+    try {
+      const { code, pressed: isDown } = JSON.parse(e.data);
+      pressed[code] = isDown;
+      document.getElementById("debug").textContent = `key ${code} ${isDown ? "DOWN" : "UP"}`;
+    } catch {}
+  };
+  ws.onerror = () => ws.close();
+}
+
+init();
+connect();
+</script>
+</body>
+</html>

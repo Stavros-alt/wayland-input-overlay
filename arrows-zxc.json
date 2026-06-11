@@ -1,0 +1,67 @@
+{
+    "default_width": 44,
+    "default_height": 44,
+    "space_h": 0,
+    "space_v": 0,
+    "flags": 0,
+    "overlay_width": 132,
+    "overlay_height": 132,
+    "elements": [
+        {
+            "type": 1,
+            "pos": [44, 0],
+            "id": "up_arrow",
+            "z_level": "0",
+            "mapping": [912, 348, 44, 44],
+            "code": 57416
+        },
+        {
+            "type": 1,
+            "pos": [0, 44],
+            "id": "left_arrow",
+            "z_level": "0",
+            "mapping": [856, 460, 44, 44],
+            "code": 57419
+        },
+        {
+            "type": 1,
+            "pos": [44, 44],
+            "id": "down_arrow",
+            "z_level": "0",
+            "mapping": [912, 460, 44, 44],
+            "code": 57424
+        },
+        {
+            "type": 1,
+            "pos": [88, 44],
+            "id": "right_arrow",
+            "z_level": "0",
+            "mapping": [968, 460, 44, 44],
+            "code": 57421
+        },
+        {
+            "type": 1,
+            "pos": [0, 88],
+            "id": "z_button",
+            "z_level": "0",
+            "mapping": [152, 460, 44, 44],
+            "code": 44
+        },
+        {
+            "type": 1,
+            "pos": [44, 88],
+            "id": "x_button",
+            "z_level": "0",
+            "mapping": [208, 460, 44, 44],
+            "code": 45
+        },
+        {
+            "type": 1,
+            "pos": [88, 88],
+            "id": "c_button",
+            "z_level": "0",
+            "mapping": [264, 460, 44, 44],
+            "code": 46
+        }
+    ]
+}
