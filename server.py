@@ -56,7 +56,6 @@ def find_keyboard():
     return None
 
 async def read_events(device):
-    """block on read_one() so we dont fuck the event loop"""
     loop = asyncio.get_running_loop()
     while True:
         # this blocks the thread but thats fine, run_in_executor handles it
@@ -67,7 +66,7 @@ async def read_events(device):
             key_event = evdev.categorize(event)
             code = EVDEV_TO_IO.get(key_event.scancode)
             if code is not None:
-                is_pressed = key_event.keystate == key_event.key_down
+                is_pressed = key_event.keystate in (key_event.key_down, key_event.key_hold)
                 msg = json.dumps({"code": code, "pressed": is_pressed})
                 await broadcast(msg)
 
